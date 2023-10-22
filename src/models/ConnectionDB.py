@@ -23,7 +23,7 @@ def consulta_total(hoja):
     try:
         result = sheet.values().get(
         spreadsheetId=SPREADSHEET_ID, 
-        range=f'{hoja}!A1:D30').execute()
+        range=f'{hoja}!A1:E30').execute()
         # extraemos values del resultado
         values = result.get('values', []) # result.get('values', [])
         return values # aplanar_listas(values)
@@ -47,7 +47,7 @@ def consulta_especifica(hoja, startIndex, endIndex):
 def agregar(hoja, values):
     ''' Tipos:
     Usuario(Name, typeUser)
-    Libro(Tittle, Author, #books)
+    Libro(Tittle, Author, #books, #prestados, #total libros)
     '''
     try:
         request = sheet.values().append(
@@ -56,8 +56,8 @@ def agregar(hoja, values):
             valueInputOption='USER_ENTERED',
             body={"values": values}
         ).execute()
-    except:
-        print('Error al agregar')
+    except Exception as ex:
+        print('Error al agregar:\n', ex)
 
 def modificar(hoja, index, values):
     try:
@@ -89,8 +89,8 @@ def eliminar(fila, hoja_id):
         request = sheet.batchUpdate(
             spreadsheetId=SPREADSHEET_ID,
             body=request_body).execute()
-    except:
-        print('Error al eliminar')
+    except Exception as ex:
+        print('Error al eliminar:\n', ex)
 
 #consulta_especifica('pruebas', 'F5', 'F5')
 #consulta_total('Libros')
