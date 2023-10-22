@@ -1,8 +1,10 @@
-from .models.ConnectionDB import ConnectionBD
+
+from ConnectionDB import consulta_total
+from tabulate import tabulate
 
 def existe_en_lista(hoja, filtro):
     #Chequear si el valor existe en la lista
-    lista = ConnectionBD.consulta_total(hoja)
+    lista = consulta_total(hoja)
     return filtro in lista
 
 def preguntar_opciones(text):
@@ -18,6 +20,9 @@ def preguntar_opciones(text):
             break
     
     return eleccion
+
+def imprimir_hoja(table_hoja):
+    print(tabulate(table_hoja))
 
 def opc_bibliotecario(): 
     #Primero debe ingresar usuario
@@ -57,3 +62,7 @@ def menu():
     print('\n\t\t\Fiiin!!\n')
 
 #menu()
+'''
+from tabulate import tabulate
+print(tabulate([['Alice', 24], ['Bob', 19]], headers=['Name', 'Age']))
+'''
