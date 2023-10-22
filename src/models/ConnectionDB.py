@@ -3,7 +3,7 @@ from googleapiclient.discovery import build
 from google.oauth2 import service_account
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-KEY = 'models/key.json'
+KEY = 'src/models/key.json'
 # ID del doc
 SPREADSHEET_ID = '1fVnfna2mmYxpfsn0UjnbXTzeJPGnhDfqgFVGhiN-2mY'
 
@@ -98,5 +98,5 @@ def eliminar(fila, hoja_id):
 #modificar('pruebas', 'H7',[['CAMBIO_2!!']])
 '''
 hojas = ['423776484', '', '']
-eliminar(15, hojas[0])
+eliminar(13, hojas[0])
 '''

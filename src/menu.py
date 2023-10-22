@@ -1,5 +1,4 @@
-
-from ConnectionDB import consulta_total
+from models.ConnectionDB import consulta_total
 from tabulate import tabulate
 
 def existe_en_lista(hoja, filtro):
@@ -22,29 +21,27 @@ def preguntar_opciones(text):
     return eleccion
 
 def imprimir_hoja(table_hoja):
-    encabezados = table_hoja.pop(0)
-    print(tabulate(table_hoja, headers=encabezados))
+    table = consulta_total(table_hoja)
+    encabezados = table.pop(0)
+    print(tabulate(table, headers=encabezados))
 
 def opc_bibliotecario(): 
     #Primero debe ingresar usuario
-    texto = '''\n\t\Biblioteacario
+    texto = '''\n\t Bibliotecario
     Ingresa tu usuario: '''
-    user = input(text=texto)
-    if not (existe_en_lista('Usuarios', user)):
-        print('\nEl usuario no existe')
-        pass
+    user = input(texto)
     
-    texto = '''\n\t\Biblioteacario
+    imprimir_hoja('Usuarios')
+    
+    texto = '''\n\t\Bibliotecario
         Puedes gestionar los libros.
         (1) Consultar.
         (2) Agregar.
         (3) Eliminar.
         Digita el numero de tu tipo: '''
-    eleccion = preguntar_opciones(text=texto)
-    print(eleccion)
 
 def menu():
-    texto = '''\n\t\tMenu
+    texto = '''\n\t\t Menu
     Bienvenido al gestor de biblioteca.
     Tipos de usuarios:
     (1) Bibliotecario.
@@ -59,13 +56,9 @@ def menu():
         pass
     else:
         print('Debe elegir un numero de las opciones')
-    
-    print('\n\t\t\Fiiin!!\n')
 
-#menu()
+menu()
 '''
-from tabulate import tabulate
 print(tabulate(
     [['Alice', 24], ['Bob', 19]],
-    headers=['Name', 'Age']))
-'''
+    headers=['Name', 'Age']))'''
