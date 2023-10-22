@@ -25,9 +25,10 @@ spreadsheet_data = [
             }
         }
     ]
+
 request_body = {"requests": spreadsheet_data}
-request = service.spreadsheets().batchUpdate(spreadsheetId=SPREADSHEET_ID, body=request_body)
-response = request.execute()
+request = sheet.batchUpdate(spreadsheetId=SPREADSHEET_ID, body=request_body)
+request.execute()
 
 '''
 #Debe ser una matriz, y por eso el doble [[]]

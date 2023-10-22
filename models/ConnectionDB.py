@@ -20,9 +20,63 @@ def aplanar_listas(lista):
 
 def consultar(hoja, startIndex, endIndex):
     #Llamar la api. Con get() es la funcion para leer u obtener datos
-    result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=f'{hoja}!{startIndex}:{endIndex}').execute()
-    # extraemos values del resultado
-    values = aplanar_listas(result.get('values', [])) # result.get('values', [])
-    print(values)
+    try:
+        result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=f'{hoja}!{startIndex}:{endIndex}').execute()
+        # extraemos values del resultado
+        values = aplanar_listas(result.get('values', [])) # result.get('values', [])
+        print(values)
+    except Exception as ex:
+        print('Error al consultar: ' + ex)
 
-consultar('Cliente', 'A1', 'A1')
+def agregar(hoja, values):
+    try:
+        request = sheet.values().append(
+            spreadsheetId=SPREADSHEET_ID,
+            range=hoja,
+            valueInputOption='USER_ENTERED',
+            body={"values": values}
+        )
+        request.execute()
+    except Exception as ex:
+        print('Error al agregar: ' + ex)
+
+def modificar(hoja, index, values):
+    try:
+        #Debe ser una matriz, y por eso el doble [[]]
+        # Llamar la api. Con append() podemos agregar datos al final de la columna.
+        result = sheet.values().update(
+            spreadsheetId=SPREADSHEET_ID, range=f'{hoja}!{index}',
+            valueInputOption='USER_ENTERED',
+            body={'values':values})
+        result.execute()
+    except Exception as ex:
+        print('Error al modificar: ' + ex)
+
+def eliminar(fila, hoja_id):
+    try:
+        spreadsheet_data = [
+                {
+                    "deleteDimension": {
+                        "range": {
+                            "sheetId": hoja_id, #id del la hoja en especifico
+                            "dimension": "ROWS",
+                            "startIndex": (fila-1), # solo elimina filas mayores estrictas a startIndex
+                            "endIndex": fila # hasta la fila igual al endIndex
+                        }
+                    }
+                }
+            ]
+
+        request_body = {"requests": spreadsheet_data}
+        request = sheet.batchUpdate(spreadsheetId=SPREADSHEET_ID, body=request_body)
+        request.execute()
+    except Exception as ex:
+        print('Error al eliminar: ' + ex)
+
+#consultar('pruebas', 'F5', 'F5')
+#agregar('pruebas', [['Cactus', 'Doroteo', 'Bibliotecario', 'Dormir', 'X', 'Y', 'Hernesto', 'Perez']])
+#modificar('pruebas', 'H7',[['CAMBIO_2!!']])
+'''
+hojas = ['423776484', '', '']
+eliminar(15, hojas[0])
+'''
