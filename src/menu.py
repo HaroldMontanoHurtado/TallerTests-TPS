@@ -22,7 +22,8 @@ def preguntar_opciones(text):
     return eleccion
 
 def imprimir_hoja(table_hoja):
-    print(tabulate(table_hoja))
+    encabezados = table_hoja.pop(0)
+    print(tabulate(table_hoja, headers=encabezados))
 
 def opc_bibliotecario(): 
     #Primero debe ingresar usuario
@@ -64,5 +65,7 @@ def menu():
 #menu()
 '''
 from tabulate import tabulate
-print(tabulate([['Alice', 24], ['Bob', 19]], headers=['Name', 'Age']))
+print(tabulate(
+    [['Alice', 24], ['Bob', 19]],
+    headers=['Name', 'Age']))
 '''

@@ -23,7 +23,7 @@ def consulta_total(hoja):
     try:
         result = sheet.values().get(
         spreadsheetId=SPREADSHEET_ID, 
-        range=f'{hoja}!A2:D30').execute()
+        range=f'{hoja}!A1:D30').execute()
         # extraemos values del resultado
         values = result.get('values', []) # result.get('values', [])
         return values # aplanar_listas(values)
