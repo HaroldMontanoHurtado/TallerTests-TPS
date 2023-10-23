@@ -62,7 +62,7 @@ def consultar_libros():
     else:
         print('-xXx- Libro NO encontrado -xXx-')
 
-def funciones_bibliotecario():
+def funciones_bibliotecario(user):
     # funciones de gestion de los libros
     def agregar_libros():
         libro=[]
@@ -81,7 +81,10 @@ def funciones_bibliotecario():
         
         libro.append(0) # add cantidad de libros prestados
         
-        agregar('Libros', [libro])
+        try:
+            agregar('Libros', [libro])
+        except Exception as ex:
+            print(f'Error al agregar libro.\n{ex}')
     
     def eliminar_libros():
         texto = '\n\t**Bibliotecario**\nVamos a eliminar un libro.\nDigita el titulo exacto del libro: '
@@ -95,15 +98,16 @@ def funciones_bibliotecario():
             fila+=1
             if busqueda in libro:
                 eliminado.append(libro)
+                print('Eliminacion exitosa.\n')
                 break
-        # todo libro con coincidencias se agrega
+            
         if not eliminado==[]:
-            print(f'\n¿Seguro deseas eliminar el libro de la fila:{fila}?')
+            print(f'\n¿Seguro deseas eliminar el libro, de la fila:{fila}?')
             print(tabulate(eliminado, encabezados))
             texto='\'si\' para aceptar o, cualquier cosa para recharzar,\Escribe: '
             decision = input(texto)
             if decision=='si':
-                eliminar(fila, hojas_google_sheet['pruebas'])
+                eliminar(fila, hojas_google_sheet['Libros'])
             else:
                 print('No se elimino el libro.')
         else:
@@ -121,22 +125,56 @@ def funciones_bibliotecario():
         elif eleccion==4:
             break
 
-def funciones_cliente():
+def funciones_cliente(user):
     def prestar_libros():
-        texto='\n\t**Cliente**\nPrestamos de libros.\nIngresar el titulo o autor exacto, del libro: '
-        respuesta=input(texto)
+        texto = '\n\t**Cliente**\nPrestacion de libros.\nDigita el titulo o autor exacto del libro: '
+        busqueda = input(texto)
+        libros = consulta_total('Libros')
+        encabezados = libros.pop(0)
+        fila=1
+        prestamo=[]
         
-        if existe_en_tabla(respuesta,'Libros'):
-            texto='\'si\' para aceptar o, cualquier cosa para recharzar,\Escribe: '
-            respuesta=input(texto)
-            if respuesta=='si':
-                pass
-                #eliminar(fila, hojas_google_sheet['pruebas'])
+        for libro in libros:
+            fila+=1
+            if busqueda in libro:
+                prestamo = libro
+                break
+        copias_totales=int(prestamo[2])
+        prestados=int(prestamo[3])
+        #print(f'prestados:{prestados} ; copias totales:{copias_totales}')
+        if not prestamo==[]:
+            if prestados < copias_totales:
+                print(f'\n¿Seguro deseas prestar este libro, de la fila:{fila}?')
+                print(tabulate([prestamo], encabezados))
+                texto='\'si\' para aceptar o, cualquier cosa para recharzar,\Escribe: '
+                decision = input(texto)
+                if decision=='si':
+                    agregar('Prestamos', [[user, prestamo[0]]])
+                    print('Se realizó el prestamo correctamente.')
+                else:
+                    print('No se elimino el libro.')
             else:
-                print('No se elimino el libro.')
+                print('No hay libros disponibles')
     
     def devolver_libros():
-        pass
+        texto = '\n\t**Cliente**\nDevolver el libro.\nDigita el titulo o autor exacto del libro: '
+        busqueda = input(texto)
+        prestamos = consulta_total('Prestamos')
+        encabezados = prestamos.pop(0)
+        fila=1
+        regreso=[]
+        user_libro=[user, busqueda]
+        
+        if user_libro in prestamos:
+            for prestamo in prestamos:
+                fila+=1
+                if user_libro==prestamo:
+                    regreso.append(prestamo)
+                    eliminar(fila, hojas_google_sheet['Prestamos'])
+                    print(f'Regreso exitoso del libro:\n{tabulate(regreso, encabezados)}\n')
+                    break
+        else:
+            print(f'El usuario \'{user}\' no ha prestado el\nlibro \'{busqueda}\'.')
     
     while True:
         texto='\n\t**Cliente**\nBienvenido cliente.\n(1) Consultar libro.\n(2) Prestar libro.\n(3) Devolver libro.\n(4) Regresar al menu.\nDigita el numero de tu peticion: '
@@ -160,7 +198,7 @@ def opciones_usuario(tipo_user, comando, texto):
     while True:
         respuesta = input(texto)
         if verificar_existe_user(respuesta, tipo_user):
-            comando() # comando deberá ser una funcion, por obligación
+            comando(respuesta) # comando deberá ser una funcion, por obligación
             break
         elif (respuesta == 'atras'):
             break
@@ -189,5 +227,5 @@ def menu():
     except:
         print('Fallo en el menu')
 
-menu()
+#menu()
 
