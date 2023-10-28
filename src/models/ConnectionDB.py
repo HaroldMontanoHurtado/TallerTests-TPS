@@ -1,6 +1,8 @@
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
+from tabulate import tabulate
+from re import compile, IGNORECASE
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 KEY = 'src/models/key.json'
@@ -100,3 +102,37 @@ def eliminar(fila, hoja_id):
 hojas = ['423776484', '', '']
 eliminar(13, hojas[0])
 '''
+# no se ha usado
+def existe_en_tabla(key, type_table):
+    tabla=consulta_total(type_table)
+    objeto=[]
+    
+    for fila in tabla:
+        if key in fila:
+            objeto.append(fila)
+    
+    return not objeto==[]
+
+def existe_coincidencia(lista, valor):
+    # Compila una expresión regular que coincide con el valor en cualquier parte de la cadena,
+    patron = compile(valor, IGNORECASE) # sin tener en cuenta mayúsculas y minúsculas
+    # Busca el valor en la lista
+    coincidencias = [x for x in lista if patron.search(x)]
+    
+    return not coincidencias==[] # Pregunta si existe alguna coincidencia
+
+def consultar_libros(buscado):
+    texto = '\n\t**Consulta libro**\nDigita el titulo o el autor del\nlibro: '
+    libros = consulta_total('Libros')
+    encabezados = libros.pop(0)
+    libros_coincidentes=[]
+    
+    for libro in libros:
+        if existe_coincidencia(libro, buscado):
+            libros_coincidentes.append(libro)
+    # todo libro con coincidencias se agrega
+    if not libros_coincidentes==[]:
+        print()
+        print(tabulate(libros_coincidentes, encabezados))
+    else:
+        print('-xXx- Libro NO encontrado -xXx-')

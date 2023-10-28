@@ -1,6 +1,11 @@
-from models.ConnectionDB import consulta_total, agregar, eliminar, modificar
+try:
+    from models.ConnectionDB import consulta_total, agregar, eliminar, consultar_libros
+except:
+    from src.models.ConnectionDB import consulta_total, agregar, eliminar, consultar_libros
 from tabulate import tabulate
-from re import compile, IGNORECASE
+
+# el llamado 'models.ConnectionDB' genera conflico con el pytest
+# pide hacer 'src.models.ConnectionDB' para que no tenga problema
 
 hojas_google_sheet={
     'Usuarios':'0', 'Libros':'2102902917',
@@ -25,42 +30,6 @@ def imprimir_hoja(table_hoja):
     table = consulta_total(table_hoja)
     encabezados = table.pop(0)
     print(tabulate(table, headers=encabezados))
-
-# no se ha usado
-def existe_en_tabla(key, type_table):
-    tabla=consulta_total(type_table)
-    objeto=[]
-    
-    for fila in tabla:
-        if key in fila:
-            objeto.append(fila)
-    
-    return not objeto==[]
-
-def existe_coincidencia(lista, valor):
-    # Compila una expresión regular que coincide con el valor en cualquier parte de la cadena,
-    patron = compile(valor, IGNORECASE) # sin tener en cuenta mayúsculas y minúsculas
-    # Busca el valor en la lista
-    coincidencias = [x for x in lista if patron.search(x)]
-    
-    return not coincidencias==[] # Pregunta si existe alguna coincidencia
-
-def consultar_libros():
-    texto = '\n\t**Consulta libro**\nDigita el titulo o el autor del\nlibro: '
-    busqueda = input(texto)
-    libros = consulta_total('Libros')
-    encabezados = libros.pop(0)
-    libros_coincidentes=[]
-    
-    for libro in libros:
-        if existe_coincidencia(libro, busqueda):
-            libros_coincidentes.append(libro)
-    # todo libro con coincidencias se agrega
-    if not libros_coincidentes==[]:
-        print()
-        print(tabulate(libros_coincidentes, encabezados))
-    else:
-        print('-xXx- Libro NO encontrado -xXx-')
 
 def funciones_bibliotecario(user):
     # funciones de gestion de los libros
@@ -104,7 +73,7 @@ def funciones_bibliotecario(user):
         if not eliminado==[]:
             print(f'\n¿Seguro deseas eliminar el libro, de la fila:{fila}?')
             print(tabulate(eliminado, encabezados))
-            texto='\'si\' para aceptar o, cualquier cosa para recharzar,\Escribe: '
+            texto='\'si\' para aceptar o, cualquier cosa para recharzar,\nEscribe: '
             decision = input(texto)
             if decision=='si':
                 eliminar(fila, hojas_google_sheet['Libros'])
@@ -117,7 +86,8 @@ def funciones_bibliotecario(user):
         texto='\n\t**Bibliotecario**\nPuedes gestionar los libros.\n(1) Consultar libro.\n(2) Agregar libro.\n(3) Eliminar libro.\n(4) Regresar al menu.\nDigita el numero de las opciones: '
         eleccion = preguntar_opciones(text=texto)
         if eleccion==1:
-            consultar_libros()
+            buscado = input('\n\t**Consulta libro**\nDigita el titulo o el autor del\nlibro: ')
+            consultar_libros(buscado)
         elif eleccion==2:
             agregar_libros()
         elif eleccion==3:
@@ -146,7 +116,7 @@ def funciones_cliente(user):
             if prestados < copias_totales:
                 print(f'\n¿Seguro deseas prestar este libro, de la fila:{fila}?')
                 print(tabulate([prestamo], encabezados))
-                texto='\'si\' para aceptar o, cualquier cosa para recharzar,\Escribe: '
+                texto='\'si\' para aceptar o, cualquier cosa para recharzar,\nEscribe: '
                 decision = input(texto)
                 if decision=='si':
                     agregar('Prestamos', [[user, prestamo[0]]])
@@ -180,7 +150,8 @@ def funciones_cliente(user):
         texto='\n\t**Cliente**\nBienvenido cliente.\n(1) Consultar libro.\n(2) Prestar libro.\n(3) Devolver libro.\n(4) Regresar al menu.\nDigita el numero de tu peticion: '
         eleccion = preguntar_opciones(text=texto)
         if eleccion==1:
-            consultar_libros()
+            buscado = input('\n\t**Consulta libro**\nDigita el titulo o el autor del\nlibro: ')
+            consultar_libros(buscado)
         elif eleccion==2:
             prestar_libros()
         elif eleccion==3:
@@ -227,5 +198,4 @@ def menu():
     except:
         print('Fallo en el menu')
 
-#menu()
-
+menu()
