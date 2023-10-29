@@ -1,7 +1,7 @@
 try:
-    from models.ConnectionDB import consulta_total, agregar, eliminar, consultar_libros
+    from models.ConnectionDB import consultar_tablas, agregar, eliminar, consultar_libro
 except:
-    from src.models.ConnectionDB import consulta_total, agregar, eliminar, consultar_libros
+    from src.models.ConnectionDB import consultar_tablas, agregar, eliminar, consultar_libro
 from tabulate import tabulate
 
 # el llamado 'models.ConnectionDB' genera conflico con el pytest
@@ -10,7 +10,6 @@ from tabulate import tabulate
 hojas_google_sheet={
     'Usuarios':'0', 'Libros':'2102902917',
     'Prestamos':'2023029017', 'pruebas':'423776484'}
-#print(hojas_google_sheet['pruebas']) #return -> '423776484'
 
 def preguntar_opciones(text):
     
@@ -27,7 +26,7 @@ def preguntar_opciones(text):
     return eleccion
 
 def imprimir_hoja(table_hoja):
-    table = consulta_total(table_hoja)
+    table = consultar_tablas(table_hoja)
     encabezados = table.pop(0)
     print(tabulate(table, headers=encabezados))
 
@@ -58,7 +57,7 @@ def funciones_bibliotecario(user):
     def eliminar_libros():
         texto = '\n\t**Bibliotecario**\nVamos a eliminar un libro.\nDigita el titulo exacto del libro: '
         busqueda = input(texto)
-        libros = consulta_total('Libros')
+        libros = consultar_tablas('Libros')
         encabezados = libros.pop(0)
         fila=1
         eliminado=[]
@@ -67,11 +66,10 @@ def funciones_bibliotecario(user):
             fila+=1
             if busqueda in libro:
                 eliminado.append(libro)
-                print('Eliminacion exitosa.\n')
                 break
             
         if not eliminado==[]:
-            print(f'\n¿Seguro deseas eliminar el libro, de la fila:{fila}?')
+            print(f'\n¿Seguro deseas eliminar el libro, de la fila: {fila}?')
             print(tabulate(eliminado, encabezados))
             texto='\'si\' para aceptar o, cualquier cosa para recharzar,\nEscribe: '
             decision = input(texto)
@@ -87,7 +85,7 @@ def funciones_bibliotecario(user):
         eleccion = preguntar_opciones(text=texto)
         if eleccion==1:
             buscado = input('\n\t**Consulta libro**\nDigita el titulo o el autor del\nlibro: ')
-            consultar_libros(buscado)
+            consultar_libro(buscado)
         elif eleccion==2:
             agregar_libros()
         elif eleccion==3:
@@ -99,7 +97,7 @@ def funciones_cliente(user):
     def prestar_libros():
         texto = '\n\t**Cliente**\nPrestacion de libros.\nDigita el titulo o autor exacto del libro: '
         busqueda = input(texto)
-        libros = consulta_total('Libros')
+        libros = consultar_tablas('Libros')
         encabezados = libros.pop(0)
         fila=1
         prestamo=[]
@@ -129,7 +127,7 @@ def funciones_cliente(user):
     def devolver_libros():
         texto = '\n\t**Cliente**\nDevolver el libro.\nDigita el titulo o autor exacto del libro: '
         busqueda = input(texto)
-        prestamos = consulta_total('Prestamos')
+        prestamos = consultar_tablas('Prestamos')
         encabezados = prestamos.pop(0)
         fila=1
         regreso=[]
@@ -151,7 +149,7 @@ def funciones_cliente(user):
         eleccion = preguntar_opciones(text=texto)
         if eleccion==1:
             buscado = input('\n\t**Consulta libro**\nDigita el titulo o el autor del\nlibro: ')
-            consultar_libros(buscado)
+            consultar_libro(buscado)
         elif eleccion==2:
             prestar_libros()
         elif eleccion==3:
@@ -162,7 +160,7 @@ def funciones_cliente(user):
 def opciones_usuario(tipo_user, comando, texto):
     
     def verificar_existe_user(user, tipo_user):
-        table = consulta_total('Usuarios')
+        table = consultar_tablas('Usuarios')
         table.pop(0) #elimino los encabezados
         return ([user, tipo_user] in table)
     
@@ -199,3 +197,4 @@ def menu():
         print('Fallo en el menu')
 
 menu()
+#print(consultar_libro('x') == [])

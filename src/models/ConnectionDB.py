@@ -1,4 +1,3 @@
-from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from tabulate import tabulate
@@ -20,7 +19,7 @@ def aplanar_listas(lista):
     lista_aplanada = [item for sublist in lista for item in sublist]
     print(lista_aplanada)
 
-def consulta_total(hoja):
+def consultar_tablas(hoja):
     #Llamar la api. Con get() es la funcion para leer u obtener datos
     try:
         result = sheet.values().get(
@@ -51,15 +50,19 @@ def agregar(hoja, values):
     Usuario(Name, typeUser)
     Libro(Tittle, Author, #books, #prestados, #total libros)
     '''
-    try:
-        request = sheet.values().append(
-            spreadsheetId=SPREADSHEET_ID,
-            range=hoja,
-            valueInputOption='USER_ENTERED',
-            body={"values": values}
-        ).execute()
-    except Exception as ex:
-        print('Error al agregar:\n', ex)
+    if not existe_en_tabla(values[0][0], hoja):
+        try:
+            request = sheet.values().append(
+                spreadsheetId=SPREADSHEET_ID,
+                range=hoja,
+                valueInputOption='USER_ENTERED',
+                body={"values": values}
+            ).execute()
+            print(f'El libro {values[0][0]} se agregó correctamente')
+        except Exception as ex:
+            print('Error al agregar:\n', ex)
+    else:
+        print('\n-xXx-El libro ya existe.-xXx-\n')
 
 def modificar(hoja, index, values):
     try:
@@ -91,27 +94,18 @@ def eliminar(fila, hoja_id):
         request = sheet.batchUpdate(
             spreadsheetId=SPREADSHEET_ID,
             body=request_body).execute()
+        print('Eliminacion exitosa.\n')
     except Exception as ex:
         print('Error al eliminar:\n', ex)
 
-#consulta_especifica('pruebas', 'F5', 'F5')
-#consulta_total('Libros')
-#agregar('pruebas', [['Cactus', 'Doroteo', 'Bibliotecario', 'Dormir', 'X', 'Y', 'Hernesto', 'Perez']])
-#modificar('pruebas', 'H7',[['CAMBIO_2!!']])
-'''
-hojas = ['423776484', '', '']
-eliminar(13, hojas[0])
-'''
 # no se ha usado
 def existe_en_tabla(key, type_table):
-    tabla=consulta_total(type_table)
-    objeto=[]
+    tabla=consultar_tablas(type_table)
     
     for fila in tabla:
         if key in fila:
-            objeto.append(fila)
-    
-    return not objeto==[]
+            return True
+    return False
 
 def existe_coincidencia(lista, valor):
     # Compila una expresión regular que coincide con el valor en cualquier parte de la cadena,
@@ -121,9 +115,8 @@ def existe_coincidencia(lista, valor):
     
     return not coincidencias==[] # Pregunta si existe alguna coincidencia
 
-def consultar_libros(buscado):
-    texto = '\n\t**Consulta libro**\nDigita el titulo o el autor del\nlibro: '
-    libros = consulta_total('Libros')
+def consultar_libro(buscado):
+    libros = consultar_tablas('Libros')
     encabezados = libros.pop(0)
     libros_coincidentes=[]
     
@@ -136,3 +129,4 @@ def consultar_libros(buscado):
         print(tabulate(libros_coincidentes, encabezados))
     else:
         print('-xXx- Libro NO encontrado -xXx-')
+    return libros_coincidentes
