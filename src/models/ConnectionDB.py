@@ -14,6 +14,10 @@ creds = service_account.Credentials.from_service_account_file(KEY, scopes=SCOPES
 service = build('sheets', 'v4', credentials=creds)
 sheet = service.spreadsheets()
 
+hojas_google_sheet={
+    'Usuarios':'0', 'Libros':'2102902917',
+    'Prestamos':'2023029017', 'pruebas':'423776484'}
+
 def aplanar_listas(lista):
     # Usando comprensión de listas
     lista_aplanada = [item for sublist in lista for item in sublist]
@@ -58,11 +62,11 @@ def agregar(hoja, values):
                 valueInputOption='USER_ENTERED',
                 body={"values": values}
             ).execute()
-            print(f'El libro {values[0][0]} se agregó correctamente')
+            #print(f'\'{values[0][0]}\' se agregó correctamente')
         except Exception as ex:
-            print('Error al agregar:\n', ex)
+            print('Error al agregar.\nError de tipo:', ex)
     else:
-        print('\n-xXx-El libro ya existe.-xXx-\n')
+        print(f'\n-xXx-\'{values[0][0]}\' ya existe.-xXx-\n')
 
 def modificar(hoja, index, values):
     try:
@@ -99,8 +103,8 @@ def eliminar(fila, hoja_id):
         print('Error al eliminar:\n', ex)
 
 # no se ha usado
-def existe_en_tabla(key, type_table):
-    tabla=consultar_tablas(type_table)
+def existe_en_tabla(key, sheet):
+    tabla=consultar_tablas(sheet)
     
     for fila in tabla:
         if key in fila:
@@ -130,3 +134,15 @@ def consultar_libro(buscado):
     else:
         print('-xXx- Libro NO encontrado -xXx-')
     return libros_coincidentes
+
+def hallar_fila(key, sheet):
+    tabla = consultar_tablas(sheet)
+    fila=0
+    encontrado=[]
+    
+    for objeto in tabla:
+        fila+=1
+        if key in objeto:
+            encontrado.append(objeto)
+            return fila
+    return fila

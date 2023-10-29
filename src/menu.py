@@ -1,15 +1,12 @@
 try:
-    from models.ConnectionDB import consultar_tablas, agregar, eliminar, consultar_libro
+    from models.ConnectionDB import consultar_tablas, agregar, eliminar, consultar_libro, hallar_fila, hojas_google_sheet
 except:
-    from src.models.ConnectionDB import consultar_tablas, agregar, eliminar, consultar_libro
+    from src.models.ConnectionDB import consultar_tablas, agregar, eliminar, consultar_libro, hallar_fila, hojas_google_sheet
 from tabulate import tabulate
 
 # el llamado 'models.ConnectionDB' genera conflico con el pytest
 # pide hacer 'src.models.ConnectionDB' para que no tenga problema
 
-hojas_google_sheet={
-    'Usuarios':'0', 'Libros':'2102902917',
-    'Prestamos':'2023029017', 'pruebas':'423776484'}
 
 def preguntar_opciones(text):
     
@@ -18,7 +15,7 @@ def preguntar_opciones(text):
         try: # intento volver numero el valor de entrada
             eleccion = int(eleccion)
         except:
-            print('\nIngreso un valor no valido.')
+            print('\nIngreso de un valor no valido.')
         # pregunto si el valor es un numero
         if(isinstance(eleccion, int)):
             break
@@ -49,23 +46,20 @@ def funciones_bibliotecario(user):
         
         libro.append(0) # add cantidad de libros prestados
         
-        try:
-            agregar('Libros', [libro])
-        except Exception as ex:
-            print(f'Error al agregar libro.\n{ex}')
+        agregar('Libros', [libro])
     
     def eliminar_libros():
         texto = '\n\t**Bibliotecario**\nVamos a eliminar un libro.\nDigita el titulo exacto del libro: '
         busqueda = input(texto)
         libros = consultar_tablas('Libros')
         encabezados = libros.pop(0)
-        fila=1
+        fila=0
         eliminado=[]
         
         for libro in libros:
-            fila+=1
             if busqueda in libro:
                 eliminado.append(libro)
+                fila=hallar_fila(eliminado[0][0],'Libros')
                 break
             
         if not eliminado==[]:
@@ -157,6 +151,23 @@ def funciones_cliente(user):
         elif eleccion==4:
             break
 
+def crear_usuario():
+    user=[]
+    
+    texto='\n\t**Crear usuario**\nVamos a agregar el usuario en dos pasos.\nPrimero ingresa tu nombre: '
+    dato=input(texto)
+    user.append(dato) # add nombre de usuario
+    
+    texto='\n\t**Bibliotecario**\nY ahora vamos a agregar el tipo de usuario\n(1) Cliente.\n(2) Bibliotecario.\nDigita la opcion: '
+    dato=preguntar_opciones(texto)
+    if dato == 1:
+        dato='Cliente'
+    else:
+        dato='Bibliotecario'
+    user.append(dato) # add tipo de usuaio
+    
+    agregar('Usuarios', [user])
+
 def opciones_usuario(tipo_user, comando, texto):
     
     def verificar_existe_user(user, tipo_user):
@@ -177,18 +188,18 @@ def opciones_usuario(tipo_user, comando, texto):
 def menu():
     try:
         while True:
-            texto = '\n\t**Menu**\nBienvenido al gestor de biblioteca.\nTipos de usuarios:\n(1) Bibliotecario.\n(2) Cliente.\n(3) Salir.\nDigita el numero de tu tipo: '
+            texto = '\n\t**Menu**\nBienvenido al gestor de biblioteca.\nTipos de usuarios:\n(1) Bibliotecario.\n(2) Cliente.\n(3) Crear Usuario.\n(4) Salir.\nDigita el numero de la opcion: '
             
             eleccion = preguntar_opciones(text=texto)
             if(eleccion==1):
                 texto = '\n\t**Bibliotecario**\nIngresa tu usuario o \'atras\'para regresar\nal menu: '
                 opciones_usuario('Bibliotecario', funciones_bibliotecario, texto)
-                
             elif(eleccion==2):
                 texto = '\n\t**Cliente**\nIngresa tu usuario o \'atras\' para regresar: '
                 opciones_usuario('Cliente', funciones_cliente, texto)
-                
             elif(eleccion==3):
+                crear_usuario()
+            elif(eleccion==4):
                 #sys.exit() # se finaliza la ejecucion
                 break # break no dispara la bandera del except
             else:
@@ -197,4 +208,3 @@ def menu():
         print('Fallo en el menu')
 
 menu()
-#print(consultar_libro('x') == [])
