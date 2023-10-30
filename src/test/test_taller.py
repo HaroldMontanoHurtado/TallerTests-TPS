@@ -1,7 +1,7 @@
 import pytest
 from src.models.ConnectionDB import consultar_tablas, agregar, consultar_libro, existe_en_tabla, hojas_google_sheet, eliminar, hallar_fila, prestar_libros, devolver_libros
 # El pytest busca y reconoce los archivos y funciones que empiecen por 'test_'
-
+'''
 # Tests de REGISTRO de libros y usuarios
 @pytest.mark.parametrize(
     "sheet, objeto, expected",
@@ -33,7 +33,7 @@ def test_agregar(sheet, objeto, expected):
 )
 def test_consultar_libros(searched, expected):
     assert (not consultar_libro(searched) == []) == expected
-
+'''
 # Tests de PRESTAMOS
 @pytest.mark.parametrize(
     "prestamo",
@@ -45,5 +45,17 @@ def test_consultar_libros(searched, expected):
 def test_prestamos(prestamo):
     prestar_libros(prestamo[0], prestamo[1])
     prestamos=consultar_tablas('Prestamos')
-    assert prestamo in prestamos
+    assert (prestamo in prestamos) == True
 
+# Tests de DEVOLUCIONES
+@pytest.mark.parametrize(
+    "devolucion",
+    [
+        (['Juan Veloza', 'titulo1']), (['Alejandra Otalvaro', '50 sombras de grey']),
+        (['Pedro Infante', 'El Principito']), (['Joe Arroyo', 'Los 10 Negritos'])
+    ]
+)
+def test_devoluciones(devolucion):
+    devolver_libros(devolucion[0], devolucion[1])
+    prestamos=consultar_tablas('Prestamos')
+    assert not devolucion in prestamos

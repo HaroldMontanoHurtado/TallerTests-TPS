@@ -50,7 +50,8 @@ def agregar(hoja, values):
     Usuario(Name, typeUser)
     Libro(Tittle, Author, #prestados)
     '''
-    if (existe_en_tabla(values[0][0], hoja) or existe_en_tabla(values[0][1], hoja)):
+    tabla=consultar_tablas(hoja)
+    if not (values[0] in tabla):
         try:
             request = sheet.values().append(
                 spreadsheetId=SPREADSHEET_ID,
@@ -60,7 +61,7 @@ def agregar(hoja, values):
             ).execute()
             print(f'^.^ Se agregó correctamente ^.^')
         except Exception as ex:
-            print('Error al agregar.\nError de tipo:', ex)
+            print('\n-xXx-Error al agregar-xXx-\n', ex)
     else:
         print(f'\n-xXx-[{values[0][0]},{values[0][1]}] ya existe.-xXx-\n')
 
@@ -117,19 +118,19 @@ def prestar_libros(user, titulo):
             except:
                 print('Prestamos cancelado.\n')
 
-def devolver_libros(user, busqueda):
+def devolver_libros(user, titulo):
     prestamos = consultar_tablas('Prestamos')
     encabezados = prestamos.pop(0)
     fila_prestamo=1
     fila_libros=0
     regreso=[]
-    user_libro=[user, busqueda]
+    user_libro=[user, titulo]
     
     prestado=[]
     libros = consultar_tablas('Libros')
     for libro in libros:
         fila_libros+=1
-        if busqueda in libro:
+        if titulo in libro:
             prestado = libro
             break
     
@@ -142,7 +143,7 @@ def devolver_libros(user, busqueda):
                 modificar('Libros', f'C{fila_libros}', [[(int(prestado[2])-1)]])
                 print(f'Regreso exitoso del libro:\n{tabulate(regreso, encabezados)}\n')
     else:
-        print(f'El usuario \'{user}\' no ha prestado el\nlibro \'{busqueda}\'.')
+        print(f'El usuario \'{user}\' no ha prestado el\nlibro \'{titulo}\'.')
 
 # no se ha usado
 def existe_en_tabla(key, sheet):
