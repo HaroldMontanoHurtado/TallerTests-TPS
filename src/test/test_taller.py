@@ -1,5 +1,5 @@
 import pytest
-from src.models.ConnectionDB import agregar, eliminar, consultar_libro, consultar_tablas, existe_en_tabla, hallar_fila, hojas_google_sheet
+from src.models.ConnectionDB import consultar_tablas, agregar, consultar_libro, existe_en_tabla, hojas_google_sheet, eliminar, hallar_fila
 # El pytest busca y reconoce los archivos y funciones que empiecen por 'test_'
 
 # Tests de REGISTRO de libros y usuarios
@@ -20,7 +20,7 @@ def test_agregar(sheet, objeto, expected):
     # almaceno el comprobante de existencia del agregado
     result=existe_en_tabla(objeto[0][0], sheet)
     # luego se podria eliminar, para no alterar la tabla
-    #eliminar(hallar_fila(objeto[0], sheet), hojas_google_sheet[sheet])
+    #eliminar(hallar_fila(objeto[0], sheet), hojas_google_sheet[sheet]) # (optional)
     assert result == expected
 
 # Tests de CONSULTAS
@@ -33,4 +33,16 @@ def test_agregar(sheet, objeto, expected):
 )
 def test_consultar_libros(searched, expected):
     assert (not consultar_libro(searched) == []) == expected
+
+# Tests de PRESTAMOS
+@pytest.mark.parametrize(
+    "prestamo, expected",
+    [
+        #('odisea', True), ('gabriel', True),
+        #('tituloX', False), ('dam', False)
+    ]
+)
+def test_prestamos(prestamo, expected):
+    prestamos=consultar_tablas('Prestamos')
+    assert (prestamo in prestamos) == expected
 

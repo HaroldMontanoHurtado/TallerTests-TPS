@@ -18,11 +18,6 @@ hojas_google_sheet={
     'Usuarios':'0', 'Libros':'2102902917',
     'Prestamos':'2023029017', 'pruebas':'423776484'}
 
-def aplanar_listas(lista):
-    # Usando comprensión de listas
-    lista_aplanada = [item for sublist in lista for item in sublist]
-    print(lista_aplanada)
-
 def consultar_tablas(hoja):
     #Llamar la api. Con get() es la funcion para leer u obtener datos
     try:
@@ -31,10 +26,11 @@ def consultar_tablas(hoja):
         range=f'{hoja}!A1:E30').execute()
         # extraemos values del resultado
         values = result.get('values', []) # result.get('values', [])
-        return values # aplanar_listas(values)
+        return values
         #print(values)
     except:
         print('Error al consultar')
+        return []
 
 def consulta_especifica(hoja, startIndex, endIndex):
     #Llamar la api. Con get() es la funcion para leer u obtener datos
@@ -52,9 +48,9 @@ def consulta_especifica(hoja, startIndex, endIndex):
 def agregar(hoja, values):
     ''' Tipos:
     Usuario(Name, typeUser)
-    Libro(Tittle, Author, #books, #prestados, #total libros)
+    Libro(Tittle, Author, #prestados)
     '''
-    if not existe_en_tabla(values[0][0], hoja):
+    if (existe_en_tabla(values[0][0], hoja) or existe_en_tabla(values[0][1], hoja)):
         try:
             request = sheet.values().append(
                 spreadsheetId=SPREADSHEET_ID,
@@ -62,11 +58,11 @@ def agregar(hoja, values):
                 valueInputOption='USER_ENTERED',
                 body={"values": values}
             ).execute()
-            #print(f'\'{values[0][0]}\' se agregó correctamente')
+            print(f'^.^ Se agregó correctamente ^.^')
         except Exception as ex:
             print('Error al agregar.\nError de tipo:', ex)
     else:
-        print(f'\n-xXx-\'{values[0][0]}\' ya existe.-xXx-\n')
+        print(f'\n-xXx-[{values[0][0]},{values[0][1]}] ya existe.-xXx-\n')
 
 def modificar(hoja, index, values):
     try:
@@ -76,8 +72,8 @@ def modificar(hoja, index, values):
             spreadsheetId=SPREADSHEET_ID, range=f'{hoja}!{index}',
             valueInputOption='USER_ENTERED',
             body={'values':values}).execute()
-    except:
-        print('Error al modificar')
+    except Exception as ex:
+        print('Error al modificar:\n', ex)
 
 def eliminar(fila, hoja_id):
     try:
@@ -101,6 +97,59 @@ def eliminar(fila, hoja_id):
         print('Eliminacion exitosa.\n')
     except Exception as ex:
         print('Error al eliminar:\n', ex)
+
+def prestar_libros(user, busqueda):
+        libros = consultar_tablas('Libros')
+        encabezados = libros.pop(0)
+        fila=1
+        prestado=[]
+        
+        for libro in libros:
+            fila+=1
+            if busqueda in libro:
+                prestado = libro
+                break
+        
+        if not prestado==[]:
+            print('\n¿Seguro deseas prestar el libro?')
+            print(tabulate([prestado], encabezados))
+            texto='\'si\' para aceptar o, cualquier cosa para recharzar,\nEscribe: '
+            decision = input(texto)
+            if decision=='si':
+                try:
+                    agregar('Prestamos', [[user, prestado[0]]])
+                    modificar('Libros', f'C{fila}', [[(int(prestado[2])+1)]])
+                except:
+                    print('Prestamos cancelado.\n')
+            else:
+                print('Prestamos cancelado.\n')
+    
+def devolver_libros(user, busqueda):
+    prestamos = consultar_tablas('Prestamos')
+    encabezados = prestamos.pop(0)
+    fila_prestamo=1
+    fila_libros=0
+    regreso=[]
+    user_libro=[user, busqueda]
+    
+    prestado=[]
+    libros = consultar_tablas('Libros')
+    for libro in libros:
+        fila_libros+=1
+        if busqueda in libro:
+            prestado = libro
+            break
+    
+    if user_libro in prestamos:
+        for prestamo in prestamos:
+            fila_prestamo+=1
+            if user_libro==prestamo:
+                regreso.append(prestamo)
+                eliminar(fila_prestamo, hojas_google_sheet['Prestamos'])
+                modificar('Libros', f'C{fila_libros}', [[(int(prestado[2])-1)]])
+                print(f'Regreso exitoso del libro:\n{tabulate(regreso, encabezados)}\n')
+    else:
+        print(f'El usuario \'{user}\' no ha prestado el\nlibro \'{busqueda}\'.')
 
 # no se ha usado
 def existe_en_tabla(key, sheet):

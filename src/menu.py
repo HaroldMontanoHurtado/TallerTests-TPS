@@ -1,7 +1,7 @@
 try:
-    from models.ConnectionDB import consultar_tablas, agregar, eliminar, consultar_libro, hallar_fila, hojas_google_sheet
+    from models.ConnectionDB import consultar_tablas, agregar, eliminar, prestar_libros, devolver_libros, consultar_libro, hallar_fila, hojas_google_sheet
 except:
-    from src.models.ConnectionDB import consultar_tablas, agregar, eliminar, consultar_libro, hallar_fila, hojas_google_sheet
+    from src.models.ConnectionDB import consultar_tablas, agregar, eliminar, modificar, consultar_libro, hallar_fila, hojas_google_sheet
 from tabulate import tabulate
 
 # el llamado 'models.ConnectionDB' genera conflico con el pytest
@@ -32,17 +32,13 @@ def funciones_bibliotecario(user):
     def agregar_libros():
         libro=[]
         
-        texto='\n\t**Bibliotecario**\nVamos a agregar el libro en tres pasos.\nPrimero ingresa el titulo del libro: '
+        texto='\n\t**Bibliotecario**\nVamos a agregar el libro en dos pasos.\nPrimero ingresa el titulo del libro: '
         dato=input(texto)
         libro.append(dato) # add titulo del libro
         
-        texto='\n\t**Bibliotecario**\nAhora vamos a agregar el nombre del autor: '
+        texto='\n\t**Bibliotecario**\nY ahora vamos a agregar el nombre del autor: '
         dato=input(texto)
         libro.append(dato) # add nombre del autor
-        
-        texto='\n\t**Bibliotecario**\nPor ultimo vamos a agregar la cantidad de libros nuevos: '
-        dato=input(texto)
-        libro.append(dato) # add cantidad de libros añadidos
         
         libro.append(0) # add cantidad de libros prestados
         
@@ -87,57 +83,7 @@ def funciones_bibliotecario(user):
         elif eleccion==4:
             break
 
-def funciones_cliente(user):
-    def prestar_libros():
-        texto = '\n\t**Cliente**\nPrestacion de libros.\nDigita el titulo o autor exacto del libro: '
-        busqueda = input(texto)
-        libros = consultar_tablas('Libros')
-        encabezados = libros.pop(0)
-        fila=1
-        prestamo=[]
-        
-        for libro in libros:
-            fila+=1
-            if busqueda in libro:
-                prestamo = libro
-                break
-        copias_totales=int(prestamo[2])
-        prestados=int(prestamo[3])
-        #print(f'prestados:{prestados} ; copias totales:{copias_totales}')
-        if not prestamo==[]:
-            if prestados < copias_totales:
-                print(f'\n¿Seguro deseas prestar este libro, de la fila:{fila}?')
-                print(tabulate([prestamo], encabezados))
-                texto='\'si\' para aceptar o, cualquier cosa para recharzar,\nEscribe: '
-                decision = input(texto)
-                if decision=='si':
-                    agregar('Prestamos', [[user, prestamo[0]]])
-                    print('Se realizó el prestamo correctamente.')
-                else:
-                    print('No se elimino el libro.')
-            else:
-                print('No hay libros disponibles')
-    
-    def devolver_libros():
-        texto = '\n\t**Cliente**\nDevolver el libro.\nDigita el titulo o autor exacto del libro: '
-        busqueda = input(texto)
-        prestamos = consultar_tablas('Prestamos')
-        encabezados = prestamos.pop(0)
-        fila=1
-        regreso=[]
-        user_libro=[user, busqueda]
-        
-        if user_libro in prestamos:
-            for prestamo in prestamos:
-                fila+=1
-                if user_libro==prestamo:
-                    regreso.append(prestamo)
-                    eliminar(fila, hojas_google_sheet['Prestamos'])
-                    print(f'Regreso exitoso del libro:\n{tabulate(regreso, encabezados)}\n')
-                    break
-        else:
-            print(f'El usuario \'{user}\' no ha prestado el\nlibro \'{busqueda}\'.')
-    
+def funciones_cliente(user):    
     while True:
         texto='\n\t**Cliente**\nBienvenido cliente.\n(1) Consultar libro.\n(2) Prestar libro.\n(3) Devolver libro.\n(4) Regresar al menu.\nDigita el numero de tu peticion: '
         eleccion = preguntar_opciones(text=texto)
@@ -145,9 +91,13 @@ def funciones_cliente(user):
             buscado = input('\n\t**Consulta libro**\nDigita el titulo o el autor del\nlibro: ')
             consultar_libro(buscado)
         elif eleccion==2:
-            prestar_libros()
+            texto = '\n\t**Cliente**\nPrestacion de libros.\nDigita el titulo o autor exacto del libro: '
+            busqueda = input(texto)
+            prestar_libros(user, busqueda)
         elif eleccion==3:
-            devolver_libros()
+            texto = '\n\t**Cliente**\nDevolver el libro.\nDigita el titulo o autor exacto del libro: '
+            busqueda = input(texto)
+            devolver_libros(user, busqueda)
         elif eleccion==4:
             break
 
@@ -204,7 +154,7 @@ def menu():
                 break # break no dispara la bandera del except
             else:
                 print('Debe elegir un numero de las opciones')
-    except:
-        print('Fallo en el menu')
+    except Exception as ex:
+        print('Fallo en el menu:\n', ex)
 
 menu()
