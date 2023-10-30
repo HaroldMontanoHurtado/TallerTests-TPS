@@ -1,12 +1,11 @@
 try:
     from models.ConnectionDB import consultar_tablas, agregar, eliminar, prestar_libros, devolver_libros, consultar_libro, hallar_fila, hojas_google_sheet
 except:
-    from src.models.ConnectionDB import consultar_tablas, agregar, eliminar, modificar, consultar_libro, hallar_fila, hojas_google_sheet
+    from src.models.ConnectionDB import consultar_tablas, agregar, eliminar, prestar_libros, devolver_libros, consultar_libro, hallar_fila, hojas_google_sheet
 from tabulate import tabulate
 
 # el llamado 'models.ConnectionDB' genera conflico con el pytest
 # pide hacer 'src.models.ConnectionDB' para que no tenga problema
-
 
 def preguntar_opciones(text):
     

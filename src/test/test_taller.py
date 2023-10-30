@@ -1,12 +1,12 @@
 import pytest
-from src.models.ConnectionDB import consultar_tablas, agregar, consultar_libro, existe_en_tabla, hojas_google_sheet, eliminar, hallar_fila
+from src.models.ConnectionDB import consultar_tablas, agregar, consultar_libro, existe_en_tabla, hojas_google_sheet, eliminar, hallar_fila, prestar_libros, devolver_libros
 # El pytest busca y reconoce los archivos y funciones que empiecen por 'test_'
 
 # Tests de REGISTRO de libros y usuarios
 @pytest.mark.parametrize(
     "sheet, objeto, expected",
     [
-        ('Libros', [['titulo1', 'autor1', '23']], True),
+        ('Libros', [['titulo1', 'autor1']], True),
         ('Usuarios', [['Jaime Altozano', 'Bibliotecario']], True),
         ('Usuarios', [['Migala', 'Cliente']], True),
         ('Libros', [['El alquimista', 'Paulo Coelho']], True),
@@ -36,13 +36,14 @@ def test_consultar_libros(searched, expected):
 
 # Tests de PRESTAMOS
 @pytest.mark.parametrize(
-    "prestamo, expected",
+    "prestamo",
     [
-        #('odisea', True), ('gabriel', True),
-        #('tituloX', False), ('dam', False)
+        (['Juan Veloza', 'titulo1']), (['Alejandra Otalvaro', '50 sombras de grey']),
+        (['Pedro Infante', 'El Principito']), (['Joe Arroyo', 'Los 10 Negritos'])
     ]
 )
-def test_prestamos(prestamo, expected):
+def test_prestamos(prestamo):
+    prestar_libros(prestamo[0], prestamo[1])
     prestamos=consultar_tablas('Prestamos')
-    assert (prestamo in prestamos) == expected
+    assert prestamo in prestamos
 

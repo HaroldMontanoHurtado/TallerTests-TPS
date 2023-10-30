@@ -98,7 +98,7 @@ def eliminar(fila, hoja_id):
     except Exception as ex:
         print('Error al eliminar:\n', ex)
 
-def prestar_libros(user, busqueda):
+def prestar_libros(user, titulo):
         libros = consultar_tablas('Libros')
         encabezados = libros.pop(0)
         fila=1
@@ -106,24 +106,17 @@ def prestar_libros(user, busqueda):
         
         for libro in libros:
             fila+=1
-            if busqueda in libro:
+            if titulo in libro:
                 prestado = libro
                 break
         
         if not prestado==[]:
-            print('\n¿Seguro deseas prestar el libro?')
-            print(tabulate([prestado], encabezados))
-            texto='\'si\' para aceptar o, cualquier cosa para recharzar,\nEscribe: '
-            decision = input(texto)
-            if decision=='si':
-                try:
-                    agregar('Prestamos', [[user, prestado[0]]])
-                    modificar('Libros', f'C{fila}', [[(int(prestado[2])+1)]])
-                except:
-                    print('Prestamos cancelado.\n')
-            else:
+            try:
+                agregar('Prestamos', [[user, prestado[0]]])
+                modificar('Libros', f'C{fila}', [[(int(prestado[2])+1)]])
+            except:
                 print('Prestamos cancelado.\n')
-    
+
 def devolver_libros(user, busqueda):
     prestamos = consultar_tablas('Prestamos')
     encabezados = prestamos.pop(0)
